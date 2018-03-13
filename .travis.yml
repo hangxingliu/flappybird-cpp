@@ -1,0 +1,20 @@
+language: cpp
+
+sudo: required
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - g++
+  - clang
+
+before_install:
+  - ./ci/setup-ci-env.sh
+
+script:
+  - ./ci/build-flappybird-sdl.sh
+
+notifications:
+  email: false
