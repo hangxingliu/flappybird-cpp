@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function throw () { echo "fatal: $1"; echo "exit 1;" exit 1; }
+function throw () { echo "fatal: $1"; echo "exit 1"; exit 1; }
 
 pushd "$( dirname "${BASH_SOURCE[0]}" )";
 pushd "..";
