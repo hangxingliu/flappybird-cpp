@@ -11,6 +11,11 @@ add_executable(${TARGET_NAME}
 	src/utils.cc
 	${HEADER_FILES})
 
+# Fix MacOSX pkg-config
+if(APPLE)
+	set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig")
+endif()
+
 INCLUDE(FindPkgConfig)
 
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
