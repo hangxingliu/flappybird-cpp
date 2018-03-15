@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>bird-01.png</file>
+        <file>bird-02.png</file>
+        <file>bird-03.png</file>
+        <file>bird-04.png</file>
+        <file>land.png</file>
+        <file>scoreboard.png</file>
+        <file>sky.png</file>
+        <file>pipe-up-longer.png</file>
+        <file>pipe-down-longer.png</file>
+        <file>font.ttf</file>
+    </qresource>
+</RCC>

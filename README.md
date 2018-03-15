@@ -18,8 +18,12 @@ cmake .. && make && ./flappy-bird; # make and run it
 
 ## flappybird-qt
 
-Working ...
+This demo is based on Qt(`QOpenGLWidget`).
 
+How to open, build and run:
+
+1. Open `./flappybird-qt/flappybird-qt.pro` in Qt creator.
+2. Build and run.
 
 ## Author
 
