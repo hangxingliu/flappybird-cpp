@@ -17,6 +17,9 @@ function setup_osx () {
 	brew_install "sdl2" || exit 1;
 	brew_install "sdl2_image" || exit 1;
 	brew_install "sdl2_ttf" || exit 1;
+	brew ln "sdl2" --force || exit 1;
+	brew ln "sdl2_image" --force || exit 1;
+	brew ln "sdl2_ttf" --force || exit 1;
 }
 
 if [[ "$TRAVIS_OS_NAME" == "" ]]; then
