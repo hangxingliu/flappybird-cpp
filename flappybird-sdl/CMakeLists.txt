@@ -13,6 +13,8 @@ add_executable(${TARGET_NAME}
 
 # Fix MacOSX pkg-config
 if(APPLE)
+	link_directories(/usr/local/lib)
+	set(CMAKE_MACOSX_RPATH 1)
 	set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig")
 endif()
 
