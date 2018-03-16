@@ -16,12 +16,14 @@
 
 class GameStatus: public QObject {
 
+public:
 #ifdef QT_DEBUG
 	bool debug = true;
 #else
 	bool debug = false;
 #endif
 
+private:
 	static const unsigned PIPE_COUNT = 4;
 
 	QList<QRect> debugRects;

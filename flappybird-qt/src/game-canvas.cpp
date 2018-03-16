@@ -61,6 +61,11 @@ void GameCanvas::keyPressEvent(QKeyEvent *event) {
 	if(event->key() == Qt::Key_Space) { // space
 		if(this->gameStatus != nullptr)
 			this->gameStatus->click();
+		event->accept();
+		return;
+	} else if(event->key() == Qt::Key_Back) {
+		event->accept();
+		exit(0);
 		return;
 	}
 

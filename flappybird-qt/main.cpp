@@ -36,6 +36,9 @@ int main(int argc, char *argv[]) {
 	#endif
 
 	GameStatus status;
+#ifdef Q_OS_ANDROID
+	status.debug = false;
+#endif
 	canvas.bindGameStatus(&status);
 
 	return a.exec();
