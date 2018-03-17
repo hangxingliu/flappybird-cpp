@@ -9,7 +9,7 @@ QPixmap* Bg::image = nullptr;
 
 Bg::Bg() { }
 
-void Bg::paint(QPainter *painter, unsigned) const {
+void Bg::paint(QPainter *painter) const {
 	// load image
 	if(image == nullptr) {
 		QPixmap rawImage(":/sky.png");

@@ -35,7 +35,8 @@ HEADERS +=	config.h \
 			src/game-objects/outline-text.h \
 			src/game-status.h \
 			src/collision.h \
-			src/game-canvas.h
+			src/game-canvas.h \
+    		src/unlocker.h
 
 SOURCES +=	src/game-status.cpp \
 			src/collision.cpp \
@@ -48,7 +49,8 @@ SOURCES +=	src/game-status.cpp \
 			src/utils.cpp \
 			src/game-canvas.cpp \
 			config.cpp \
-			main.cpp
+			main.cpp \
+			src/unlocker.cpp
 
 RESOURCES += resources/resources.qrc
 

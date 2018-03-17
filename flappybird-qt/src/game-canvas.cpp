@@ -7,6 +7,7 @@
 #include "game-canvas.h"
 #include "../config.h"
 
+QColor GameCanvas::landColor("#DED895");
 QColor GameCanvas::backgroundColor("#F3F4F7");
 QColor GameCanvas::skyColor("#66C4CC");
 
@@ -28,7 +29,8 @@ void GameCanvas::paintEvent(QPaintEvent *) {
 		gameHeight = config::GAME_HEIGHT;
 
 	// draw background
-	painter.fillRect(0, 0, parentWidth, parentHeight, backgroundColor);
+	painter.fillRect(0, 0, parentWidth, parentHeight,
+		(parentWidth * config::GAME_HEIGHT / config::GAME_WIDTH) > parentHeight ? backgroundColor : landColor);
 
 	if(parentWidth > config::GAME_WIDTH || parentHeight > config::GAME_HEIGHT) {
 		double scale = 1.0 * parentWidth / gameWidth;
@@ -36,7 +38,8 @@ void GameCanvas::paintEvent(QPaintEvent *) {
 			scale = 1.0 * parentHeight / gameHeight;
 
 		double offsetX = (parentWidth - gameWidth * scale) * 0.5;
-		double offsetY = (parentHeight - gameHeight * scale) * 0.5;
+		double offsetY = 0; //(parentHeight - gameHeight * scale) * 0.5;
+
 		painter.translate(offsetX, offsetY);
 
 		painter.scale(scale, scale);
@@ -49,54 +52,29 @@ void GameCanvas::paintEvent(QPaintEvent *) {
 	painter.fillRect(0, 0, gameWidth, gameHeight, skyColor);
 
 	if(this->gameStatus != nullptr)
-		this->gameStatus->paint(&painter, counter);
+		this->gameStatus->paint(&painter);
 
 	painter.end();
 	counter++;
 }
 
-const QList<QString> GameCanvas::DANCING_CODE = { "HANGXINGLIU", "NIGHT", "QUICK" };
 void GameCanvas::keyPressEvent(QKeyEvent *event) {
-	// qDebug() << "keyPress" << event->key();
-	if(event->key() == Qt::Key_Space) { // space
-		if(this->gameStatus != nullptr)
-			this->gameStatus->click();
-		event->accept();
-		return;
-	} else if(event->key() == Qt::Key_Back) {
-		event->accept();
-		exit(0);
-		return;
-	}
+	auto key = event->key();
+	switch(key) {
+		case Qt::Key_Space:
+			if(this->gameStatus != nullptr)
+				this->gameStatus->onClick();
+			event->accept();
+			return;
 
-	dancing += QKeySequence(event->key()).toString().toUpper();
-	for(const QString& code: DANCING_CODE) {
-		if(dancing == code) {
-			qDebug() << code;
-			if(code == "HANGXINGLIU") {
-				config::PIPE_GAP *= 2;
-			} else if(code == "NIGHT") {
-				skyColor = QColor("#008793");
-				QImage image = Bg::image->toImage();
-				int w = image.width(), h = image.height();
-				for(int y = 0; y < h ; y ++ ) {
-					for(int x = 0; x < w ; x ++ ) {
-						QColor color = image.pixelColor(x, y);
-						image.setPixelColor(x, y, color.dark(150));
-					}
-				}
-				delete Bg::image;
-				Bg::image = new QPixmap(QPixmap::fromImage(image));
-			} else if(code == "QUICK") {
-				config::BIRD_SPEED = 4;
-				config::PIPE_BETWEEN = 400;
-			}
+		case Qt::Key_Back: // android back button
+		case Qt::Key_Escape:
+			event->accept();
+			exit(0);
 			return;
-		} else if(code.startsWith(dancing)) {
-			return;
-		}
+		default:
+			unlocker.input(key);
 	}
-	dancing = "";
 }
 
 void GameCanvas::mousePressEvent(QMouseEvent *event) {
@@ -106,11 +84,17 @@ void GameCanvas::mousePressEvent(QMouseEvent *event) {
 
 	switch(event->button()) {
 		case Qt::LeftButton:
-			this->gameStatus->click();
+			this->gameStatus->onClick();
 			break;
 		case Qt::RightButton:
-			this->gameStatus->rightClick();
+			this->gameStatus->onRightClick();
 			break;
 	}
 }
+
+//#ifdef Q_OS_ANDROID
+void GameCanvas::mouseMoveEvent(QMouseEvent *event) {
+	unlocker.mmove(this->width(), this->height(), event->x(), event->y());
+}
+//#endif
 

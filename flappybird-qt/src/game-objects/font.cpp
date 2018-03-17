@@ -2,6 +2,7 @@
 
 #include <QFontDatabase>
 #include <QFont>
+#include <QPainterPath>
 
 #include "./font.h"
 
@@ -15,6 +16,18 @@ QFont Font::fontXs;
 QFont Font::fontSm;
 QFont Font::fontMd;
 QFont Font::fontLg;
+
+double Font::heightXS = 0;
+double Font::heightSm = 0;
+double Font::heightMd = 0;
+double Font::heightLg = 0;
+
+
+double Font::testHeight(const QFont &font) {
+	QPainterPath pp;
+	pp.addText(0, 0, font, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\"':@!");
+	return pp.boundingRect().height();
+}
 
 Font::Font() {
 	if(!load) {
@@ -31,6 +44,11 @@ Font::Font() {
 		fontMd = QFont(fontFamilyName, 30);
 		fontLg = QFont(fontFamilyName, 60);
 
+		heightXS = testHeight(fontXs);
+		heightSm = testHeight(fontSm);
+		heightMd = testHeight(fontMd);
+		heightLg = testHeight(fontLg);
+
 		load = true;
 	}
 }
@@ -39,4 +57,10 @@ const QFont &Font::getXs() { return fontXs; }
 const QFont &Font::getSm() { return fontSm; }
 const QFont &Font::getMd() { return fontMd; }
 const QFont &Font::getLg() { return fontLg; }
+
+
+double Font::getHeightXS() { return heightXS; }
+double Font::getHeightSm() { return heightSm; }
+double Font::getHeightMd() { return heightMd; }
+double Font::getHeightLg() { return heightLg; }
 

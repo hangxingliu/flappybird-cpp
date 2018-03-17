@@ -9,7 +9,7 @@ QPixmap* Land::image = nullptr;
 
 Land::Land() { }
 
-void Land::paint(QPainter *painter, unsigned counter) const {
+void Land::paint(QPainter *painter) const {
 	// load image
 	if(image == nullptr) {
 		QPixmap rawImage(":/land.png");
@@ -20,7 +20,7 @@ void Land::paint(QPainter *painter, unsigned counter) const {
 		image = new QPixmap(rawImage.scaledToHeight(config::LAND_HEIGHT));
 	}
 
-	int offsetX = -((counter * 66 / 10) % config::GAME_WIDTH);
+	int offsetX = -(x % config::GAME_WIDTH);
 	int offsetY = config::GAME_HEIGHT - image->height();
 	int imageW = image->width(), imageH = image->height();
 

@@ -7,8 +7,6 @@
 #define BIRD_H
 
 class Bird {
-	static const int SPEED;
-
 	static const unsigned IMAGE_COUNT;
 	static const unsigned ANGLE_COUNT;
 
@@ -17,22 +15,28 @@ class Bird {
 	/// rotatedImages[index * 200 + (rotateAngle + 90)];
 	static QPixmap **rotatedIamges;
 
-	mutable unsigned index = 0;
-	unsigned nextIndex() const {
-		index = index >= (IMAGE_COUNT - 1) ? 0 : (index + 1);
-		return index;
-	}
 
 
 	void load() const;
 	QPixmap* getRotatedImage(int angle) const;
 
+	unsigned frameIndex = 0;
 public:
+	double v = 0;
+	int angle = 0;
+	int heightFromLand = 0;
+	int x = 0;
+
 	Bird();
-	void paint(QPainter* painter, unsigned counter, int offset2Left, int height2land, int angle) const;
+	void paint(QPainter* painter);
+	void resetToGameStart();
+	void moveAStep();
+
 	CollisionPoints* getCollisionPoints() const;
 	static int width();
 	static int height();
+
+	void nextFrame() { frameIndex = frameIndex >= (IMAGE_COUNT - 1) ? 0 : (frameIndex + 1); }
 };
 
 #endif

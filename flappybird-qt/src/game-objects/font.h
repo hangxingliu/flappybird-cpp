@@ -14,6 +14,9 @@ class Font {
 	static QFont fontMd;
 	static QFont fontLg;
 
+	static double heightXS, heightSm, heightMd, heightLg;
+	static double testHeight(const QFont& font);
+
 public:
 	Font();
 	const QFont& getXs();
@@ -21,6 +24,10 @@ public:
 	const QFont& getMd();
 	const QFont& getLg();
 
+	double getHeightXS();
+	double getHeightSm();
+	double getHeightMd();
+	double getHeightLg();
 };
 
 #endif

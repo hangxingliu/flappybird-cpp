@@ -21,9 +21,9 @@ void OutlineText::paint(QPainter *painter,
 	const QFont &font,
 	const QColor &inside, const QColor &outline,
 	bool shadow, int shadowOffsetX, int shadowOffsetY) {
+	painter->save();
 
 	QPainterPath path;
-	painter->save();
 	path.addText(0, 0, font, text);
 
 	QRectF rect = path.boundingRect();
@@ -39,5 +39,4 @@ void OutlineText::paint(QPainter *painter,
 	painter->strokePath(path, QPen(outline, outlineWidth));
 
 	painter->restore();
-
 }

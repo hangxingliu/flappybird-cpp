@@ -8,8 +8,10 @@ class Land {
 	static QPixmap *image;
 
 public:
+	int x = 0;
+
 	Land();
-	void paint(QPainter* painter, unsigned counter) const;
+	void paint(QPainter* painter) const;
 };
 
 #endif

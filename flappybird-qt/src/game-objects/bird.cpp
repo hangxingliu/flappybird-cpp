@@ -1,11 +1,12 @@
+#include <QDebug>
+
 #include <iostream>
 
 #include "./bird.h"
+#include "../utils.h"
 #include "../../config.h"
 
 using namespace std;
-
-const int Bird::SPEED = 2;
 
 const unsigned Bird::IMAGE_COUNT = 4;
 const unsigned Bird::ANGLE_COUNT = 200;
@@ -40,37 +41,52 @@ QPixmap* Bird::getRotatedImage(int angle) const {
 			<< angle << ")" << endl;
 		exit(1);
 	}
-	unsigned id = index * ANGLE_COUNT + (unsigned) (angle + 90);
+	unsigned id = frameIndex * ANGLE_COUNT + (unsigned) (angle + 90);
 	if(rotatedIamges[id] == nullptr) {
 		QMatrix rm;
 		rm.rotate(angle);
 
-		QPixmap* image = images[index];
+		QPixmap* image = images[frameIndex];
 		rotatedIamges[id] = new QPixmap(image->transformed(rm));
 	}
 	return rotatedIamges[id];
 }
 
-Bird::Bird() { }
+Bird::Bird() { resetToGameStart(); }
 
-void Bird::paint(QPainter *painter, unsigned counter, int offset2Left, int height2land, int angle) const {
+void Bird::paint(QPainter *painter) {
 	// load image
 	if(images == nullptr)
 		load();
 
 	QPixmap* image = getRotatedImage(angle);
-	int x = offset2Left - (image->width() >> 1);
-	int y = config::SKY_HEIGHT - height2land - (image->height() >> 1);
+	int w = image->width(), h = image->height();
+	int x = config::BIRD_X_OFFSET - (w >> 1);
+	int y = utils::convertHeightToCanvasY(heightFromLand) - (h >> 1);
 
-	painter->drawPixmap(x, y, image->width(), image->height(), *image);
+	painter->drawPixmap(x, y, w, h, *image);
+}
 
-	if(counter % SPEED == 0)
-		nextIndex();
+void Bird::resetToGameStart() {
+	angle = 0;
+	v = 0;
+	x = 0;
+	heightFromLand = config::BIRD_INIT_HEIGHT;
+}
+
+void Bird::moveAStep() {
+	x += config::BIRD_SPEED;
+
+	heightFromLand -= v * 0.1;
+	v += config::G * 0.1;
+
+	angle = utils::inRange(v * 2, -30, 40);
 }
 
 CollisionPoints *Bird::getCollisionPoints() const {
-	return collisionPoints ? collisionPoints[index] : nullptr;
+	return collisionPoints ? collisionPoints[frameIndex] : nullptr;
 }
 
 int Bird::width() { return images && images[0] ? images[0]->width() : 0; }
 int Bird::height() { return images && images[0] ? images[0]->height() : 0; }
+

@@ -15,7 +15,7 @@ class Pipe {
 public:
 
 	Pipe(bool isDown = true);
-	void paint(QPainter* painter, unsigned counter, int x, int yOffset) const;
+	void paint(QPainter* painter, int x, int yOffset) const;
 	int height() const;
 	int width() const;
 };
@@ -26,7 +26,7 @@ public:
 	Pipe pipeDown;
 
 	PipeCouple(): pipeUp(false), pipeDown(true) {}
-	void paint(QPainter* painter, unsigned counter, int x, int yGapOffset) const;
+	void paint(QPainter* painter, int x, int yGapOffset) const;
 };
 
 #endif

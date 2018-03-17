@@ -8,6 +8,7 @@
 namespace utils {
 	void initRand();
 	int randInt(int low, int high);
+	int inRange(int v, int min, int max);
 
 	int convertHeightToCanvasY(int height);
 	int convertCanvasYToHeight(int canvasY);

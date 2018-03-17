@@ -10,7 +10,7 @@ public:
 	static QPixmap *image;
 
 	Bg();
-	void paint(QPainter* painter, unsigned counter) const;
+	void paint(QPainter* painter) const;
 };
 
 #endif

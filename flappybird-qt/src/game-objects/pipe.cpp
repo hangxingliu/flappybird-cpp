@@ -29,7 +29,7 @@ void Pipe::load() {
 
 Pipe::Pipe(bool isDown): isDown(isDown) { }
 
-void Pipe::paint(QPainter *painter, unsigned, int x, int yOffset) const {
+void Pipe::paint(QPainter *painter, int x, int yOffset) const {
 	// load image
 	load();
 
@@ -51,9 +51,9 @@ int Pipe::width() const {
 	return isDown ? imageDown->width() : imageUp->width();
 }
 
-void PipeCouple::paint(QPainter *painter, unsigned counter, int x, int yGapOffset) const {
+void PipeCouple::paint(QPainter *painter, int x, int yGapOffset) const {
 	int pipeHeight = pipeDown.height();
-	pipeDown.paint(painter, counter, x, yGapOffset - pipeHeight);
-	pipeUp.paint(painter, counter, x, yGapOffset + config::PIPE_GAP);
+	pipeDown.paint(painter, x, yGapOffset - pipeHeight);
+	pipeUp.paint(painter, x, yGapOffset + config::PIPE_GAP);
 
 }

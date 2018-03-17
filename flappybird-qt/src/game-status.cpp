@@ -6,15 +6,16 @@
 #include "./game-objects/outline-text.h"
 
 void GameStatus::play() {
-	playingTimerId = startTimer(config::CYCLE);
-
-	boolIsPlaying = true;
-	boolIsDead = false;
-	birdHeight = config::BIRD_INIT_HEIGHT;
-	birdX = 0;
-	birdAngle = 0;
+	gameStage = STAGE_PLAYING;
+	objBird.resetToGameStart();
 	score = 0;
-	v = 0;
+
+	GameStatusThread* thread = GameStatusThread::getThread(this);
+	if(thread == nullptr) {
+		qDebug() << "Could not start game because thread(GameStatusHandler) is nullptr!";
+		return;
+	}
+	thread->start();
 
 	pipeMaxX = config::PIPE_FIRST_X;
 	for(unsigned i = 0 ; i < PIPE_COUNT ; i ++, pipeMaxX += config::PIPE_BETWEEN ) {
@@ -24,17 +25,17 @@ void GameStatus::play() {
 	}
 }
 
-void GameStatus::paintAndMovePipes(QPainter *painter, unsigned counter) {
+void GameStatus::paintAndMovePipes(QPainter *painter) {
 	for(unsigned i = 0 ; i < PIPE_COUNT ; i ++ ) {
-		int xOffset = pipeX[i] - birdX + config::BIRD_X_OFFSET;
-		objPipes[i].paint(painter, counter, xOffset, pipeGapY[i]);
+		int xOffset = pipeX[i] - objBird.x + config::BIRD_X_OFFSET;
+		objPipes[i].paint(painter, xOffset, pipeGapY[i]);
 
-		if(!pipeAddedScore[i] && pipeX[i] < birdX) {
+		if(!pipeAddedScore[i] && pipeX[i] < objBird.x) {
 			pipeAddedScore[i] = true;
 			score ++;
 		}
 
-		if(boolIsPlaying && xOffset < - config::PIPE_WIDTH - 10) {
+		if(gameStage == STAGE_PLAYING && xOffset < - config::PIPE_WIDTH - 10) {
 			pipeX[i] = pipeMaxX;  pipeMaxX += config::PIPE_BETWEEN;
 			pipeGapY[i] = utils::randInt(config::PIPE_GAP_MIN_HEIGHT, config::PIPE_GAP_MAX_HEIGHT);
 			pipeAddedScore[i] = false;
@@ -42,44 +43,42 @@ void GameStatus::paintAndMovePipes(QPainter *painter, unsigned counter) {
 	}
 }
 
-void GameStatus::paint(QPainter *painter, unsigned counter) {
-	if(defaultFont == nullptr)
-		defaultFont = new QFont(painter->font());
+void GameStatus::paint(QPainter *painter) {
+	painter->save();
 
 	int centerX = config::GAME_WIDTH >> 1;
 	int centerY = config::GAME_HEIGHT >> 1;
 
-	objBg.paint(painter, counter);
+	objBg.paint(painter);
+	if(gameStage != STAGE_PREPARE)
+		paintAndMovePipes(painter);
+	objBird.paint(painter);
+	objLand.paint(painter);
 
-	if(boolIsPlaying || boolIsDead)
-		paintAndMovePipes(painter, counter);
-
-	objBird.paint(painter, boolIsDead ? 1 : counter,
-		config::BIRD_X_OFFSET, birdHeight, birdAngle);
-
-	objLand.paint(painter, boolIsDead ? 1 : counter);
-
-	if(boolIsPlaying) {
+	if(gameStage == STAGE_PLAYING) {
 		OutlineText::paint(painter,
-			centerX, config::PLAYING_SCORE_Y, 3,
+			centerX, config::PLAYING_SCORE_Y + objFont.getHeightMd(), 3,
 			QString::number(score), objFont.getMd(),
 			Qt::white, Qt::black,
 			true, 3, 3);
-	}
-
-	if(!boolIsPlaying) {
-		if(boolIsDead) {
+	}else {
+		if(gameStage == STAGE_DEAD) {
 			OutlineText::paintWhiteBlack(painter,
-				centerX, centerY - 100, 3,
+				centerX, centerY - objFont.getHeightLg(), 3,
 				"SCORE:", objFont.getSm(), true, 2, 2);
 
 			OutlineText::paintWhiteBlack(painter,
-				centerX, centerY, 5,
+				centerX, centerY + objFont.getHeightSm(), 5,
 				QString::number(score), objFont.getLg(), true, 8, 8);
 		} else {
 			OutlineText::paint(painter,
 				centerX, centerY + 100, 3,
-				"\"SPACE\" TO START!", objFont.getMd(),
+				"\"SPACE\" TO START!",
+				#ifdef Q_OS_ANDROID
+					objFont.getXs(),
+				#else
+					objFont.getMd(),
+				#endif
 				QColor("#ECFBDE"), QColor("#543846"), true, 5, 5);
 		}
 	}
@@ -87,101 +86,39 @@ void GameStatus::paint(QPainter *painter, unsigned counter) {
 	// ===== author name =========
 
 	painter->setFont(objFont.getXs());
-	painter->drawText(QRect(0, 0, config::GAME_WIDTH - 5, config::GAME_HEIGHT - 5),
-		Qt::AlignBottom|Qt::AlignRight,
+	painter->drawText(QRect(0, config::SKY_HEIGHT + 30, config::GAME_WIDTH - 5, config::LAND_HEIGHT),
+		Qt::AlignTop|Qt::AlignRight,
 		"Author: LiuYue @hangxingliu");
 
-	painter->setFont(*defaultFont);
-	// ===== finish painting =====
-
-	if(!debug)
-		return;
-
-	// ======= debug info =======
-	const int PADDING = 10, PADDING2 = PADDING * 2;
-	QRect debugTextArea(PADDING, PADDING, config::GAME_WIDTH - PADDING2, config::GAME_HEIGHT - PADDING2);
-	QStringList debugInfo;
-	debugInfo << "playing: " << (boolIsPlaying ? "true" : "false");
-	debugInfo << "dead: " << (boolIsDead ? "true" : "false");
-	debugInfo << "score: " << QString::number(score);
-	debugInfo << "bird's x: " << QString::number(birdX);
-	debugInfo << "bird's h: " << QString::number(birdHeight);
-	debugInfo << "bird's v: " << QString::number(v);
-	QString debugMessage = "debug:";
-	for(int i = 0, i2 = debugInfo.length() ; i < i2 ; i += 2)
-		debugMessage += QString("\n  %1%2").arg(debugInfo[i], debugInfo[i+1]);
-
-	painter->drawText(debugTextArea, debugMessage);
-
-	QPen originalPen(painter->pen());
-
-	painter->setPen(QPen(QColor(0, 0, 0, 30), 2));
-	for(unsigned i = 100 ; i < config::GAME_HEIGHT ; i += 100 ) {
-		painter->drawLine(0, i, config::GAME_WIDTH, i);
-		painter->drawText(QRect(0, i, config::GAME_WIDTH, 50),
-			Qt::AlignLeft|Qt::AlignTop,
-			QString("%1 (h: %2)").arg(
-				QString::number(i),
-				QString::number(utils::convertCanvasYToHeight(i))));
-	}
-	for(unsigned i = 100 ; i < config::GAME_WIDTH ; i += 100 ) {
-		painter->drawLine(i, 0, i, config::GAME_HEIGHT);
-		const int TEXT_HEIGHT = 50, TEXT_WIDTH = 100;
-		painter->drawText(QRect(i, config::GAME_HEIGHT - TEXT_HEIGHT,
-				TEXT_WIDTH, TEXT_HEIGHT),
-			Qt::AlignLeft|Qt::AlignTop,
-			QString("%1\nx: %2").arg(
-				QString::number(i),
-				QString::number(utils::convertCanvasXToGameX(i, birdX))));
-	}
-	painter->setPen(QPen(Qt::red, 4));
-	painter->drawPoint(utils::convertGameXToCanvasX(birdX, birdX),
-		utils::convertHeightToCanvasY(birdHeight));
-
-	for(const QRect& rect: debugRects)
-		painter->drawRect(rect);
-
-	painter->setPen(QPen(Qt::red, 1));
-	for(const QPoint& point: debugPoints)
-		painter->drawPoint(point);
-
-	painter->setPen(originalPen);
-
+	painter->restore();
 }
 
-void GameStatus::timerEvent(QTimerEvent*) {
-	birdX += config::BIRD_SPEED;
+void GameStatus::playingCalculate(int counter) {
+	if((counter & 3) == 0) objBird.nextFrame();
 
-	birdHeight -= v * 0.1;
-	v += config::G * 0.1;
+	objBird.moveAStep();
+	objLand.x += config::BIRD_SPEED;
 
-	birdAngle = 0;
-	if(birdHeight <= 0 ) birdAngle = 90;
-	else if(v <= -15) birdAngle = -30;
-	else if(v >= 20) birdAngle = 40;
-	else birdAngle = v * 2;
 
-	if(birdHeight <= 0) {
+	if(objBird.heightFromLand <= 0) {
+		objBird.angle = 90;
 		return setStatusToDead();
 	}
+
+	if(config::RUSH) return;
+
+	const int MAX_ALLOW_HEIGHT = config::SKY_HEIGHT + config::MAX_OVERFLOW_HEIGHT;
+	if(objBird.heightFromLand >= MAX_ALLOW_HEIGHT)
+		objBird.heightFromLand = MAX_ALLOW_HEIGHT;
 
 	int birdW = Bird::width(), birdH = Bird::height();
 	if(birdW > 0 && birdH > 0) {
 		auto collision = objBird.getCollisionPoints();
 		if(collision) {
 			CollisionPoints rCollision(*collision);
-			rCollision.rotate(birdAngle);
+			rCollision.rotate(objBird.angle);
 
-			QPoint center(birdX, birdHeight);
-
-			// // debug display bird border
-			// debugPoints.clear();
-			// auto points = rCollision.getAllPoints(center);
-			// for(const QPointF& p: points) {
-			//	debugPoints.push_back(QPoint(
-			//		utils::convertGameXToCanvasX(p.x(), birdX),
-			//		utils::convertHeightToCanvasY(p.y())));
-			//}
+			QPoint center(objBird.x, objBird.heightFromLand);
 
 			int pipeW = config::PIPE_WIDTH, pipeH = objPipes[0].pipeDown.height();
 			for(unsigned i = 0 ; i < PIPE_COUNT ; i ++ ) {
@@ -198,36 +135,53 @@ void GameStatus::timerEvent(QTimerEvent*) {
 
 	}
 
-	const int MAX_ALLOW_HEIGHT = config::SKY_HEIGHT + config::MAX_OVERFLOW_HEIGHT;
-	if(birdHeight >= MAX_ALLOW_HEIGHT) {
-		birdHeight = MAX_ALLOW_HEIGHT;
-	}
-
 }
 
-void GameStatus::click() {
-	if(boolIsDead) {
+void GameStatus::onClick() {
+	if(gameStage == STAGE_DEAD) {
 		// delay to display score
 		if(afterDeadTimer.tick() < 1500)
 			return;
-		birdHeight = config::BIRD_INIT_HEIGHT;
-		boolIsDead = false;
-		birdAngle = 0;
-		v = 0;
+
+		objBird.resetToGameStart();
+		gameStage = STAGE_PREPARE;
 		return;
 	}
 
-	if(!boolIsPlaying)
+	if(gameStage == STAGE_PREPARE )
 		this->play();
 
-	v = -45;
+	objBird.v = config::BIRD_CLICK_UP_V;
 }
 
 void GameStatus::setStatusToDead() {
-	boolIsPlaying = false;
-	boolIsDead = true;
+	gameStage = STAGE_DEAD;
 	afterDeadTimer.reset();
+}
 
-	if(this->playingTimerId != 0)
-		this->killTimer(this->playingTimerId);
+GameStatusThread* GameStatusThread::singleInstance = nullptr;
+GameStatusThread* GameStatusThread::getThread(GameStatus *status) {
+	if(!status)
+		return nullptr;
+	if(singleInstance) {
+		if(singleInstance->hadStop) {
+			delete singleInstance;
+			return singleInstance = new GameStatusThread(status);
+		}
+		return nullptr;
+	}
+	return singleInstance = new GameStatusThread(status);
+}
+
+void GameStatusThread::run() {
+	int counter = 0;
+	while(!shouldIStop()) {
+		status->playingCalculate(counter++);
+
+		if(status->gameStage != STAGE_PLAYING)
+			break;
+		QThread::msleep(config::CYCLE);
+	}
+	hadStop = true;
+	qDebug() << "GameStatusHandler stop";
 }

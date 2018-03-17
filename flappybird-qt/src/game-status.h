@@ -2,6 +2,8 @@
 #include <QPainter>
 #include <QList>
 #include <QPoint>
+#include <QThread>
+#include <QMutex>
 
 #include "./game-objects/bg.h"
 #include "./game-objects/bird.h"
@@ -14,7 +16,14 @@
 #ifndef GAME_STATUS_H
 #define GAME_STATUS_H
 
+enum GameStage {
+	STAGE_PREPARE = 0,
+	STAGE_PLAYING = 1,
+	STAGE_DEAD = 2
+};
+
 class GameStatus: public QObject {
+	friend class GameStatusThread;
 
 public:
 #ifdef QT_DEBUG
@@ -26,41 +35,27 @@ public:
 private:
 	static const unsigned PIPE_COUNT = 4;
 
-	QList<QRect> debugRects;
-	QList<QPoint> debugPoints;
-
 	Bg objBg;
 	Bird objBird;
 	Land objLand;
 	Font objFont;
 	PipeCouple objPipes[PIPE_COUNT];
 
-	QFont* defaultFont = nullptr;
-
-	bool boolIsPlaying = false;
-	bool boolIsDead = false;
+	GameStage gameStage = STAGE_PREPARE;
 	utils::Timer afterDeadTimer;
-	int playingTimerId = 0;
 
 public:
-	double v = 0;
-
 	int score = 0;
-	int best = 0;
-
-	int birdX = 0;
-	int birdHeight = config::BIRD_INIT_HEIGHT;
-	int birdAngle = 0;
 
 	int pipeMaxX = -999;
 	int pipeGapY[PIPE_COUNT];
 	int pipeX[PIPE_COUNT];
 	bool pipeAddedScore[PIPE_COUNT];
 
-	void paintAndMovePipes(QPainter* painter, unsigned counter);
+	void paintAndMovePipes(QPainter* painter);
 
 	void play();
-	void paint(QPainter* painter, unsigned counter);
+	void paint(QPainter* painter);
 
 	explicit GameStatus(QObject *parent = nullptr): QObject(parent) {
 		for(unsigned i = 0 ; i < PIPE_COUNT ; i ++) {
@@ -72,13 +67,36 @@ public:
 	}
 	~GameStatus() {}
 
-	bool isPlaying() { return this->boolIsPlaying; }
-	void click();
-	void rightClick() { debug = !debug; }
+	void onClick();
+	void onRightClick() { debug = !debug; }
 
 private:
 	void setStatusToDead();
-	void timerEvent(QTimerEvent *event);
+	void playingCalculate(int counter);
 };
+
+class GameStatusThread: public QThread {
+	static GameStatusThread* singleInstance;
+
+	bool hadStop = false;
+	bool tryStop = false;
+	GameStatus* status = nullptr;
+
+	QMutex tryStopMutex;
+	bool shouldIStop() { QMutexLocker locker(&tryStopMutex); return tryStop; }
+
+	GameStatusThread(GameStatus* status): status(status) {}
+
+public:
+
+	void stop() { QMutexLocker locker(&tryStopMutex); tryStop = true; }
+	static GameStatusThread* getThread(GameStatus* status);
+
+	// QThread interface
+protected:
+	void run();
+};
+
+
 
 #endif // GAME_STATUS_H
