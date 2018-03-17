@@ -1,5 +1,7 @@
 # Flappy Bird
 
+[![Build Status](https://travis-ci.org/hangxingliu/flappybird-cpp.svg?branch=master)](https://travis-ci.org/hangxingliu/flappybird-cpp)
+
 Two simple FlappyBird demonstrations written in `C++`.
 One demo use `SDL2`, and other one use `Qt`.
 
