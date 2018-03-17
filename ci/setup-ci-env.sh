@@ -7,19 +7,8 @@ function setup_linux () {
 		libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev || exit 1;
 }
 
-function brew_install () {
-	(brew outdated "$1" || brew install $1) || (echo "Error installing $1"; exit 1);
-}
-
 function setup_osx () {
-	brew update || exit 1;
-	brew_install "pkg-config" || exit 1;
-	brew_install "sdl2" || exit 1;
-	brew_install "sdl2_image" || exit 1;
-	brew_install "sdl2_ttf" || exit 1;
-	brew ln "sdl2" --force || exit 1;
-	brew ln "sdl2_image" --force || exit 1;
-	brew ln "sdl2_ttf" --force || exit 1;
+	brew install "pkg-config" "sdl2" "sdl2_image" "sdl2_ttf" || exit 1;
 }
 
 if [[ "$TRAVIS_OS_NAME" == "" ]]; then

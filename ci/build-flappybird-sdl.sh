@@ -15,7 +15,7 @@ cmake ../flappybird-sdl || throw "cmake failed!";
 make || throw  "make failed!";
 
 cd ..;
-rm "$BUILD_DIR" -rf || throw "could not clean build directory!";
+rm -rf "$BUILD_DIR"  || throw "could not clean build directory!";
 
 echo "build-flappybird-sdl.sh done!";
 exit 0;
