@@ -12,7 +12,7 @@ QColor GameCanvas::backgroundColor("#F3F4F7");
 QColor GameCanvas::skyColor("#66C4CC");
 
 GameCanvas::GameCanvas(QWidget *parent): QOpenGLWidget(parent) {
-	startTimer(1000 / config::FPS);
+	startTimer(config::DRAW_INTERVAL);
 }
 
 void GameCanvas::timerEvent(QTimerEvent *) {

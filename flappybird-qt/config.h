@@ -5,9 +5,9 @@
 #define CONFIG_H
 
 namespace config {
-	extern int CYCLE;
+	extern int CALC_INTERVAL;
 
-	extern int FPS;
+	extern int DRAW_INTERVAL;
 
 	extern int GAME_WIDTH;
 	extern int GAME_HEIGHT;
@@ -24,12 +24,13 @@ namespace config {
 
 	extern int MAX_OVERFLOW_HEIGHT;
 
-	extern int BIRD_SPEED;
+	extern int BIRD_X_SPEED;
+	extern int BIRD_X_SPEED_MULTIPLE;
 	extern int BIRD_SIZE_HEIGHT;
 
 	extern int BIRD_X_OFFSET;
 	extern int BIRD_INIT_HEIGHT;
-	extern int BIRD_CLICK_UP_V;
+	extern int BIRD_ADD_Y_SPEED;
 
 	extern int PLAYING_SCORE_Y;
 

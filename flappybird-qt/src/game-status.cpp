@@ -97,7 +97,7 @@ void GameStatus::playingCalculate(int counter) {
 	if((counter & 3) == 0) objBird.nextFrame();
 
 	objBird.moveAStep();
-	objLand.x += config::BIRD_SPEED;
+	objLand.x += config::BIRD_X_SPEED * config::BIRD_X_SPEED_MULTIPLE;
 
 
 	if(objBird.heightFromLand <= 0) {
@@ -151,7 +151,7 @@ void GameStatus::onClick() {
 	if(gameStage == STAGE_PREPARE )
 		this->play();
 
-	objBird.v = config::BIRD_CLICK_UP_V;
+	objBird.v = config::BIRD_ADD_Y_SPEED;
 }
 
 void GameStatus::setStatusToDead() {
@@ -180,7 +180,7 @@ void GameStatusThread::run() {
 
 		if(status->gameStage != STAGE_PLAYING)
 			break;
-		QThread::msleep(config::CYCLE);
+		QThread::msleep(config::CALC_INTERVAL);
 	}
 	hadStop = true;
 	qDebug() << "GameStatusHandler stop";

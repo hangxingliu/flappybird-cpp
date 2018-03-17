@@ -30,17 +30,17 @@ void Unlocker::unlock(QString code) {
 		delete Bg::image;
 		Bg::image = new QPixmap(QPixmap::fromImage(image));
 	} else if(code == "QUICK") {
-		config::BIRD_SPEED = 4;
+		config::BIRD_X_SPEED_MULTIPLE = 2;
 		config::PIPE_BETWEEN = 400;
 	} else if(code == "RUSH") {
-		config::BIRD_SPEED = 4;
+		config::BIRD_X_SPEED_MULTIPLE = 2;
 		config::RUSH = !config::RUSH;
 	} else if(code == "MOON") {
 		config::PIPE_BETWEEN = 500;
 		config::PIPE_FIRST_X = 600;
 		config::G = 4.9;
 	} else if(code == "ANTI") {
-		config::BIRD_CLICK_UP_V = 45;
+		config::BIRD_ADD_Y_SPEED = 45;
 		config::G = -9.8;
 	}
 }

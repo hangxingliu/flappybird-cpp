@@ -75,10 +75,10 @@ void Bird::resetToGameStart() {
 }
 
 void Bird::moveAStep() {
-	x += config::BIRD_SPEED;
+	x += config::BIRD_X_SPEED * config::BIRD_X_SPEED_MULTIPLE;
 
-	heightFromLand -= v * 0.1;
-	v += config::G * 0.1;
+	heightFromLand -= v * 0.2;
+	v += config::G * 0.2;
 
 	angle = utils::inRange(v * 2, -30, 40);
 }
