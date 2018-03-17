@@ -2,7 +2,7 @@
 
 int config::CALC_INTERVAL = 20;
 
-int config::DRAW_INTERVAL = 15;
+int config::DRAW_INTERVAL = 10;
 
 int config::GAME_WIDTH = 480;
 int config::GAME_HEIGHT = 720;

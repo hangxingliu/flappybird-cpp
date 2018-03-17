@@ -44,6 +44,7 @@ void GameStatus::paintAndMovePipes(QPainter *painter) {
 }
 
 void GameStatus::paint(QPainter *painter) {
+	// utils::Timer timer; timer.reset();
 	painter->save();
 
 	int centerX = config::GAME_WIDTH >> 1;
@@ -86,11 +87,11 @@ void GameStatus::paint(QPainter *painter) {
 	// ===== author name =========
 
 	painter->setFont(objFont.getXs());
-	painter->drawText(QRect(0, config::SKY_HEIGHT + 30, config::GAME_WIDTH - 5, config::LAND_HEIGHT),
-		Qt::AlignTop|Qt::AlignRight,
-		"Author: LiuYue @hangxingliu");
+	painter->drawStaticText(5, config::GAME_HEIGHT - config::LAND_HEIGHT + 30,
+		staticTextAuthor);
 
 	painter->restore();
+	// qDebug() << timer.tick();
 }
 
 void GameStatus::playingCalculate(int counter) {
@@ -124,9 +125,10 @@ void GameStatus::playingCalculate(int counter) {
 			for(unsigned i = 0 ; i < PIPE_COUNT ; i ++ ) {
 				int gapHeight = utils::convertCanvasYToHeight(pipeGapY[i]);
 				int x1 = pipeX[i], x2 = x1 + pipeW;
+				x1+=2; x2-=2; // for decrease 4 pixels area
 
-				if(rCollision.detect(center, x1, gapHeight, x2, gapHeight + pipeH) || // pipe-down
-					rCollision.detect(center, x1, gapHeight - config::PIPE_GAP, // pipe-up
+				if(rCollision.detect(center, x1, gapHeight + 2, x2, gapHeight + pipeH) || // pipe-down
+					rCollision.detect(center, x1, gapHeight - config::PIPE_GAP - 2, // pipe-up
 						x2, gapHeight - config::PIPE_GAP - pipeH)) {
 					return setStatusToDead();
 				}
@@ -175,12 +177,26 @@ GameStatusThread* GameStatusThread::getThread(GameStatus *status) {
 
 void GameStatusThread::run() {
 	int counter = 0;
+	int elapsed = 0;
+	utils::Timer timer;
+
 	while(!shouldIStop()) {
+		timer.reset();
 		status->playingCalculate(counter++);
+		elapsed = timer.tick();
 
 		if(status->gameStage != STAGE_PLAYING)
 			break;
-		QThread::msleep(config::CALC_INTERVAL);
+
+		//if(elapsed > 0 && (counter & 3) == 0)
+		//	qDebug() << elapsed;
+
+		if(elapsed > config::CALC_INTERVAL)
+			continue;
+		if(elapsed == 0)
+			QThread::msleep(config::CALC_INTERVAL);
+		else
+			QThread::msleep(config::CALC_INTERVAL - elapsed);
 	}
 	hadStop = true;
 	qDebug() << "GameStatusHandler stop";

@@ -4,6 +4,7 @@
 #include <QPoint>
 #include <QThread>
 #include <QMutex>
+#include <QStaticText>
 
 #include "./game-objects/bg.h"
 #include "./game-objects/bird.h"
@@ -44,6 +45,8 @@ private:
 	GameStage gameStage = STAGE_PREPARE;
 	utils::Timer afterDeadTimer;
 
+	QStaticText staticTextAuthor;
+
 public:
 	int score = 0;
 
@@ -57,7 +60,10 @@ public:
 	void play();
 	void paint(QPainter* painter);
 
-	explicit GameStatus(QObject *parent = nullptr): QObject(parent) {
+	explicit GameStatus(QObject *parent = nullptr):
+		QObject(parent),
+		staticTextAuthor("Author: LiuYue @hangxingliu") {
+
 		for(unsigned i = 0 ; i < PIPE_COUNT ; i ++) {
 			objPipes[i] = PipeCouple();
 			pipeX[i] = -999;

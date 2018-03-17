@@ -3,6 +3,8 @@
 Two simple FlappyBird demonstrations written in `C++`.
 One demo use `SDL2`, and other one use `Qt`.
 
+![qt-screenshot](screenshots/qt.gif)
+
 ## flappybird-sdl
 
 This demo is modified from my assignment of c++ lesson in my freshman year.
@@ -24,6 +26,8 @@ How to open, build and run:
 
 1. Open `./flappybird-qt/flappybird-qt.pro` in Qt creator.
 2. Build and run.
+
+Detailed information about this Qt project: [README-QT-PROJECT.md](README-QT-PROJECT.md)
 
 ## Author
 

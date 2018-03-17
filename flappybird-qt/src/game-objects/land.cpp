@@ -26,5 +26,5 @@ void Land::paint(QPainter *painter) const {
 
 	painter->drawPixmap(offsetX, offsetY, imageW, imageH, *image); offsetX += imageW;
 	painter->drawPixmap(offsetX, offsetY, imageW, imageH, *image); offsetX += imageW;
-	painter->drawPixmap(offsetX, offsetY, imageW, imageH, *image); offsetX += imageW;
+	painter->drawPixmap(offsetX, offsetY, imageW, imageH, *image); // offsetX += imageW;
 }
